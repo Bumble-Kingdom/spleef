@@ -13,6 +13,7 @@ group = project.maven_group
 repositories {
 	maven { url = "https://maven.nucleoid.xyz/" }
 	maven { url = "https://maven.gegy.dev/" }
+	mavenCentral()
 }
 
 loom {
@@ -27,6 +28,9 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	modImplementation 'xyz.nucleoid:plasmid:0.5+1.19.3-SNAPSHOT'
+
+	implementation 'com.mysql:mysql-connector-j:8.0.32'
+	include("com.mysql:mysql-connector-j:8.0.32")
 }
 
 processResources {
