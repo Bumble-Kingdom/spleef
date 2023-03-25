@@ -65,8 +65,16 @@ public class Database {
             }
         }
 
-        public static void parseCurrencyUpdate(ServerPlayerEntity player, int ammount){
-
+        public static void addToUserWithoutCheck(ServerPlayerEntity player, int ammount){
+            String sql = "UPDATE data SET currencyAmmount=currencyAmmount+? WHERE data.UUID = ?";
+            try{
+                PreparedStatement stmt = connection.prepareStatement(sql);
+                stmt.setInt(1, ammount);
+                stmt.setString(2, player.getUuid().toString());
+                stmt.executeUpdate();
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
         }
     }
 }

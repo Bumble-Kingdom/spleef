@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
         public static String db_username = "";
         public static String db_password = "";
         public static String db_table_name = "bumblespleefData";
+        public static String economy_unit = "credits";
 
         public static final Logger LOGGER = LogManager.getLogger("Bumble Spleef");
 
@@ -27,6 +28,7 @@ import org.apache.logging.log4j.Logger;
                 db_username = CONFIG.getOrDefault("database_username", db_username);
                 db_password = CONFIG.getOrDefault("database_password", db_password);
                 db_table_name = CONFIG.getOrDefault("database_table_name", db_table_name);
+                economy_unit = CONFIG.getOrDefault("database_table_name", economy_unit);
             }
 
             LOGGER.info("Regestering done!");
@@ -38,7 +40,8 @@ import org.apache.logging.log4j.Logger;
                     + "\ndatabase_url=" + db_url
                     + "\ndatabase_username=" + db_username
                     + "\ndatabase_password=" + db_password
-                    + "\ndatabase_table_name=" + db_table_name;
+                    + "\ndatabase_table_name=" + db_table_name
+                    + "\neconomy_unit=" + economy_unit;
 
         }
 }
