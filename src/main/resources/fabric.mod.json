@@ -10,6 +10,9 @@
   "entrypoints": {
     "main": ["xyz.nucleoid.spleef.Spleef"]
   },
+  "mixins": [
+    "bumblespleef.mixins.json"
+  ],
   "accessWidener": "spleef.accesswidener",
   "depends": {
     "fabricloader": ">=0.12.12",

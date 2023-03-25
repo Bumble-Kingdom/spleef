@@ -1,6 +1,7 @@
 package io.github.blobanium.spleef.database;
 
 import io.github.blobanium.spleef.config.ConfigReader;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.sql.*;
 
@@ -51,6 +52,21 @@ public class Database {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        public static void onPlayerJoin(ServerPlayerEntity player){
+            String sql = "INSERT IGNORE INTO " + ConfigReader.db_table_name + "(UUID, currencyAmmount, isOnline) VALUES (?, 0, 1) ON DUPLICATE KEY UPDATE isOnline=1";
+            try{
+                PreparedStatement stmt = connection.prepareStatement(sql);
+                stmt.setString(1, player.getUuid().toString());
+                stmt.executeUpdate();
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+
+        public static void parseCurrencyUpdate(ServerPlayerEntity player, int ammount){
+
         }
     }
 }
