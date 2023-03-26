@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ServerLoginNetworkHandlerMixin {
     @Inject(at = @At("HEAD"), method = "addToServer")
     private void addToServer(ServerPlayerEntity player, CallbackInfo ci){
-        Database.SqlActions.onPlayerJoin(player);
+        if(Database.connection != null) {
+            Database.SqlActions.onPlayerJoin(player);
+        }
     }
 }

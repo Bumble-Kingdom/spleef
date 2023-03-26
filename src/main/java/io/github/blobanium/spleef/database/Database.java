@@ -10,7 +10,7 @@ public class Database {
     public static boolean isactive = false;
 
     //Connection vars
-    static Connection connection; //This is the variable we will use to connect to database
+    public static Connection connection; //This is the variable we will use to connect to database
 
     public static void onEnable(){
         try { // try catch to get any SQL errors (for example connections errors)
