@@ -1,5 +1,6 @@
 package xyz.nucleoid.spleef.game;
 
+import io.github.blobanium.spleef.BumbleSpleefEvents;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
@@ -49,6 +50,8 @@ public final class SpleefActive {
     private boolean hasEnded = false;
     private long closeTime = -1;
 
+    private int initPlayers;
+
     private SpleefActive(GameSpace gameSpace, ServerWorld world, SpleefMap map, SpleefConfig config, GlobalWidgets widgets) {
         this.gameSpace = gameSpace;
         this.world = world;
@@ -58,6 +61,8 @@ public final class SpleefActive {
         this.ignoreWinState = gameSpace.getPlayers().size() <= 1;
 
         this.timerBar = SpleefTimerBar.create(widgets);
+
+        this.initPlayers = gameSpace.getPlayers().size();
     }
 
     public static void open(GameSpace gameSpace, ServerWorld world, SpleefMap map, SpleefConfig config) {
@@ -221,6 +226,9 @@ public final class SpleefActive {
     }
 
     private void broadcastWin(WinResult result) {
+        //Import win event
+        BumbleSpleefEvents.onWinEvent(result.winningPlayer, initPlayers);
+
         var winningPlayer = result.winningPlayer();
 
         hasEnded = true;

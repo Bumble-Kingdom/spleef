@@ -1,5 +1,6 @@
 package xyz.nucleoid.spleef;
 
+import io.github.blobanium.spleef.BumbleSpleef;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.registry.RegistryKeys;
@@ -31,5 +32,7 @@ public final class Spleef implements ModInitializer {
         MapShapeRenderer.REGISTRY.register(new Identifier(Spleef.ID, "square"), SquareShapeRenderer.CODEC);
         MapShapeRenderer.REGISTRY.register(new Identifier(Spleef.ID, "sierpinski_carpet"), SierpinskiCarpetShapeRenderer.CODEC);
         MapShapeRenderer.REGISTRY.register(new Identifier(Spleef.ID, "pattern"), PatternShapeRenderer.CODEC);
+
+        BumbleSpleef.onEnable();
     }
 }

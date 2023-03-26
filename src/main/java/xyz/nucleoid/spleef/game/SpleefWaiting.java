@@ -3,6 +3,9 @@ package xyz.nucleoid.spleef.game;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
@@ -98,6 +101,14 @@ public final class SpleefWaiting {
                             true,
                             false
                     ));
+
+                    //Disclose Source + Give Credit
+                    MutableText text = Text.empty();
+                    text.append("This game is open source! Visit the source code by clicking on this message!");
+                    text.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Bumble-Kingdom/spleef")));
+                    player.sendMessage(text);
+
+                    player.sendMessage(Text.of("The original works of this project was created by NucleoidMC licensed under LPGL3."));
                 });
     }
 }
