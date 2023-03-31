@@ -1,6 +1,7 @@
 package xyz.nucleoid.spleef.game;
 
 import io.github.blobanium.spleef.BumbleSpleefEvents;
+import io.github.blobanium.spleef.ai.Dummy;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
@@ -93,6 +94,8 @@ public final class SpleefActive {
 
             activity.listen(PlayerDamageEvent.EVENT, active::onPlayerDamage);
             activity.listen(PlayerDeathEvent.EVENT, active::onPlayerDeath);
+
+            Dummy.createDummyPlayer(gameSpace.getServer());
         });
     }
 
