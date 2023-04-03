@@ -18,21 +18,17 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 public class Dummy {
         public static final EntityType<DummyPlayerEntity> DUMMY_PLAYER_TYPE = Registry.register(
@@ -49,14 +45,17 @@ public class Dummy {
 
         public static ServerPlayerEntity createDummyPlayer(MinecraftServer server) {
             ServerPlayerEntity player = new DummyPlayerEntity(server, server.getOverworld(), new BlockPos(0, 70, 0));
-            server.getPlayerManager().onPlayerConnect(new ClientConnection(NetworkSide.SERVERBOUND), player);
             return player;
         }
 
         public static class DummyPlayerEntity extends ServerPlayerEntity {
             private int sprintTimer = 0;
+            private ClientConnection cconnection;
+
             public DummyPlayerEntity(MinecraftServer server, ServerWorld world, BlockPos pos) {
                 super(server, world, new GameProfile(UUID.randomUUID(), "DummyPlayer"));
+                this.cconnection = new ClientConnection(NetworkSide.SERVERBOUND);
+                server.getPlayerManager().onPlayerConnect(cconnection,this);
                 this.refreshPositionAndAngles(pos.getX(), pos.getY(), pos.getZ(), 0, 0);
             }
 
@@ -73,11 +72,6 @@ public class Dummy {
 
                 // update sprinting state
                 this.setSprinting(this.shouldSprint());
-
-                // update movement
-                Vec3d movement = this.getVelocity();
-                this.setVelocity(movement.multiply(1.0D, 0.6D, 1.0D)); // simulate jumping behavior
-                this.move(MovementType.SELF, this.getVelocity());
 
                 // update look direction
                 if (this.world.getTime() % 10 == 0) {
@@ -100,24 +94,50 @@ public class Dummy {
                 } else if (this.isOnGround()) {
                     // ground behavior
                     if (this.shouldJump()) {
-                        this.jump();
+                        //this.jump();
                     } else {
-                        this.moveForward();
+                        //this.moveForward();
                     }
                 } else {
                     // air behavior
                     // TODO: add custom air behavior
                 }
 
-                // Apply gravity
-                double gravity = 0.08;
-                this.setVelocity(this.getVelocity().getX(), this.getVelocity().getY() - gravity, this.getVelocity().getZ());
 
                 // Move the entity
-                double x = this.getX() + this.getVelocity().getX();
-                double y = this.getY() + this.getVelocity().getY();
-                double z = this.getZ() + this.getVelocity().getZ();
-                this.setPosition(x, y, z);
+                //double x = this.getX() + this.getVelocity().getX();
+                //double y = this.getY() + this.getVelocity().getY();
+                //double z = this.getZ() + this.getVelocity().getZ();
+                //this.setPosition(x, y, z);
+
+                // get the entity's bounding box
+                Box entityBox = this.getBoundingBox();
+
+                // get the world object
+                World world = this.getEntityWorld();
+
+                // get a list of all the blocks that intersect with the entity's bounding box
+                Iterable<VoxelShape> collisionShapes = world.getCollisions(this, entityBox);
+                List<VoxelShape> shapes = new ArrayList<>();
+
+                collisionShapes.forEach(shapes::add);
+
+
+                if(!this.doesNotCollide(0,0,0)){
+                    // there is a collision!
+
+                    this.setVelocity(adjustMovementForCollisions(this, this.getVelocity(),this.getBoundingBox(), this.getEntityWorld(), shapes).negate());
+                }else{
+                    //Slow Down the player if its moving
+
+                    this.setVelocity(this.getVelocity().multiply(0.8));
+                }
+
+                // Apply gravity only if there isnt a vertical collision
+                if(!this.verticalCollision) {
+                    double gravity = 0.08;
+                    this.setVelocity(this.getVelocity().getX(), this.getVelocity().getY() - gravity, this.getVelocity().getZ());
+                }
 
                 // Limit the maximum velocity
                 double maxVelocity = 0.5;
@@ -127,44 +147,8 @@ public class Dummy {
                     this.setVelocity(this.getVelocity().getX() * factor, this.getVelocity().getY() * factor, this.getVelocity().getZ() * factor);
                 }
 
-                // get the entity's bounding box
-                Box entityBox = this.getBoundingBox();
-
-                // get the world object
-                World world = this.getEntityWorld();
-
-                // get a list of all the blocks that intersect with the entity's bounding box
-                Iterable<VoxelShape> collisionShapes = world.getBlockCollisions(this, entityBox);
-
-                // check if any of the collision shapes are non-empty
-                for (VoxelShape shape : collisionShapes) {
-                    if (!shape.isEmpty()) {
-                        // there is a collision!
-
-                        // calculate the collision vector (the direction the entity needs to move to escape the collision)
-                        Vec3d position = this.getPos().negate();
-                        Optional<Vec3d> collisionVector = shape.offset(position.x, position.y, position.z).getClosestPointTo(Vec3d.ZERO);
-
-                        // adjust the entity's position to move it out of the collision
-                        double dx = Math.abs(collisionVector.get().x);
-                        double dy = Math.abs(collisionVector.get().y);
-                        double dz = Math.abs(collisionVector.get().z);
-                        if (dx < dy && dx < dz) {
-                            this.setVelocity(this.getVelocity().multiply(-1, 1, 1));
-                        } else if (dy < dz) {
-                            this.setVelocity(this.getVelocity().multiply(1, -1, 1));
-                        } else {
-                            this.setVelocity(this.getVelocity().multiply(1, 1, -1));
-                        }
-                    }
-                }
-
                 // update the entity's position based on its velocity
                 this.move(MovementType.SELF, this.getVelocity());
-
-                // Apply gravity to the entity
-                this.move(MovementType.SELF, this.getVelocity().add(0.0, -0.08, 0.0));
-
             }
 
             private void moveForward() {
@@ -221,7 +205,6 @@ public class Dummy {
                 EntityHitResult entityHitResult = ProjectileUtil.getEntityCollision(this.world, this, vec3d, vec3d1, searchBox, entity1 -> entity1 == entity); // perform the raycast, checking for collisions with only the `entity`
                 return entityHitResult == null || entityHitResult.getEntity() == entity; // check if the target entity was hit by the raycast or not
             }
-
 
         }
 }
