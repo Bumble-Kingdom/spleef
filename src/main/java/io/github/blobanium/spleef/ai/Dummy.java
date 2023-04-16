@@ -23,18 +23,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class Dummy {
         public static final EntityType<DummyPlayerEntity> DUMMY_PLAYER_TYPE = Registry.register(
                 Registries.ENTITY_TYPE,
                 new Identifier("examplemod", "dummy_player"),
-                FabricEntityTypeBuilder.<DummyPlayerEntity>create()
+                FabricEntityTypeBuilder.Living.<DummyPlayerEntity>create()
                         .trackable(64, 10, true)
                         .build()
         );
@@ -116,39 +113,7 @@ public class Dummy {
                 // get the world object
                 World world = this.getEntityWorld();
 
-                // get a list of all the blocks that intersect with the entity's bounding box
-                Iterable<VoxelShape> collisionShapes = world.getCollisions(this, entityBox);
-                List<VoxelShape> shapes = new ArrayList<>();
-
-                collisionShapes.forEach(shapes::add);
-
-
-                if(!this.doesNotCollide(0,0,0)){
-                    // there is a collision!
-
-                    this.setVelocity(adjustMovementForCollisions(this, this.getVelocity(),this.getBoundingBox(), this.getEntityWorld(), shapes).negate());
-                }else{
-                    //Slow Down the player if its moving
-
-                    this.setVelocity(this.getVelocity().multiply(0.8));
-                }
-
-                // Apply gravity only if there isnt a vertical collision
-                if(!this.verticalCollision) {
-                    double gravity = 0.08;
-                    this.setVelocity(this.getVelocity().getX(), this.getVelocity().getY() - gravity, this.getVelocity().getZ());
-                }
-
-                // Limit the maximum velocity
-                double maxVelocity = 0.5;
-                double currentVelocity = this.getVelocity().length();
-                if (currentVelocity > maxVelocity) {
-                    double factor = maxVelocity / currentVelocity;
-                    this.setVelocity(this.getVelocity().getX() * factor, this.getVelocity().getY() * factor, this.getVelocity().getZ() * factor);
-                }
-
-                // update the entity's position based on its velocity
-                this.move(MovementType.SELF, this.getVelocity());
+                this.travel(new Vec3d(0,0,0));
             }
 
             private void moveForward() {
