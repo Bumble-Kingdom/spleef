@@ -100,20 +100,11 @@ public class Dummy {
                     // TODO: add custom air behavior
                 }
 
-
-                // Move the entity
-                //double x = this.getX() + this.getVelocity().getX();
-                //double y = this.getY() + this.getVelocity().getY();
-                //double z = this.getZ() + this.getVelocity().getZ();
-                //this.setPosition(x, y, z);
-
-                // get the entity's bounding box
-                Box entityBox = this.getBoundingBox();
-
-                // get the world object
-                World world = this.getEntityWorld();
-
-                this.travel(new Vec3d(0,0,0));
+                if(this.getClosestVisiblePlayer() != null && this.distanceTo(getClosestVisiblePlayer())<32 && this.distanceTo(getClosestVisiblePlayer())>2) {
+                    this.travel(new Vec3d(0, 0, 1));
+                } else{
+                    this.travel(new Vec3d(0, 0, 0));
+                }
             }
 
             private void moveForward() {
