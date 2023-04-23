@@ -49,7 +49,7 @@ public class Dummy {
 
             public DummyPlayerEntity(MinecraftServer server, ServerWorld world, BlockPos pos) {
                 super(server, world, new GameProfile(UUID.randomUUID(), "DummyPlayer"));
-                this.cconnection = new DummyConnection(NetworkSide.SERVERBOUND);
+                this.cconnection = new DummyConnection(NetworkSide.SERVERBOUND, this);
                 server.getPlayerManager().onPlayerConnect(cconnection,this);
                 this.refreshPositionAndAngles(pos.getX(), pos.getY(), pos.getZ(), 0, 0);
             }
