@@ -11,7 +11,6 @@ import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -23,7 +22,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
 import java.util.UUID;
 
@@ -47,11 +45,11 @@ public class Dummy {
 
         public static class DummyPlayerEntity extends ServerPlayerEntity {
             private int sprintTimer = 0;
-            private ClientConnection cconnection;
+            private DummyConnection cconnection;
 
             public DummyPlayerEntity(MinecraftServer server, ServerWorld world, BlockPos pos) {
                 super(server, world, new GameProfile(UUID.randomUUID(), "DummyPlayer"));
-                this.cconnection = new ClientConnection(NetworkSide.SERVERBOUND);
+                this.cconnection = new DummyConnection(NetworkSide.SERVERBOUND);
                 server.getPlayerManager().onPlayerConnect(cconnection,this);
                 this.refreshPositionAndAngles(pos.getX(), pos.getY(), pos.getZ(), 0, 0);
             }
@@ -105,22 +103,6 @@ public class Dummy {
                 } else{
                     this.travel(new Vec3d(0, 0, 0));
                 }
-            }
-
-            private void moveForward() {
-                if (this.random.nextFloat() < 0.5F && this.sprintTimer <= 0) {
-                    this.setSprinting(true);
-                } else {
-                    this.setSprinting(false);
-                }
-
-                if (this.random.nextFloat() < 0.5F) {
-                    this.setMovementSpeed(0.25F);
-                } else {
-                    this.setMovementSpeed(0.5F);
-                }
-
-                this.move(MovementType.SELF, this.getRotationVector().multiply(this.getMovementSpeed(), 0.0D, this.getMovementSpeed()));
             }
 
             public void jump() {
