@@ -1,11 +1,13 @@
 package io.github.blobanium.spleef.ai;
 
 import com.mojang.authlib.GameProfile;
+import io.github.blobanium.spleef.BumbleSpleef;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
@@ -42,9 +44,14 @@ public class Dummy {
             return player;
         }
 
+        //Travel Types
+        public static final Vec3d IDLE = new Vec3d(0,0,0);
+        public static final Vec3d MOVE_FORWARD = new Vec3d(0,0,1);
+
         public static class DummyPlayerEntity extends ServerPlayerEntity {
             private int sprintTimer = 0;
             private DummyConnection cconnection;
+            private Path currentPath = null;
 
             public DummyPlayerEntity(MinecraftServer server, ServerWorld world, BlockPos pos) {
                 super(server, world, new GameProfile(UUID.randomUUID(), "DummyPlayer"));
@@ -67,12 +74,6 @@ public class Dummy {
                 // update sprinting state
                 this.setSprinting(this.shouldSprint());
 
-                // update look direction
-                if (this.world.getTime() % 10 == 0) {
-                    if(this.getClosestVisiblePlayer() != null) {
-                        this.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, this.getClosestVisiblePlayer().getEyePos());
-                    }
-                }
 
                 // update sprint timer
                 if (this.isSprinting()) {
@@ -97,10 +98,20 @@ public class Dummy {
                     // TODO: add custom air behavior
                 }
 
-                if(this.getClosestVisiblePlayer() != null && this.distanceTo(getClosestVisiblePlayer())<32 && this.distanceTo(getClosestVisiblePlayer())>2) {
-                    this.travel(new Vec3d(0, 0, 1));
-                } else{
-                    this.travel(new Vec3d(0, 0, 0));
+                if(this.currentPath != null){
+                    if(this.getPos() == this.currentPath.getCurrentNodePos().toCenterPos()){
+                        currentPath.next();
+                    }else {
+                        if (this.world.getTime() % 10 == 0) {
+                            this.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, currentPath.getCurrentNodePos().toCenterPos());
+                        }
+                        this.travel(MOVE_FORWARD);
+                    }
+                }else {
+                    if (this.getClosestVisiblePlayer() != null){
+                        currentPath = DummyPathfinding.getPath(this, this.getClosestVisiblePlayer(), 2);
+                    }
+                    this.travel(IDLE);
                 }
             }
 
